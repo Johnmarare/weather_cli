@@ -7,6 +7,7 @@ import argparse
 import json
 from configparser import ConfigParser
 from urllib import parse, request, error
+import datetime
 
 import style
 
@@ -128,43 +129,70 @@ def display_weather_info(weather_data, imperial=False):
         imperial (bool): Whether or not to use imperial units.
     """
     city = weather_data["name"]
+    country = weather_data["sys"]["country"]
     weather_id = weather_data["weather"][0]["id"]
     weather_description = weather_data["weather"][0]["description"]
     temperature = weather_data["main"]["temp"]
+    humidity = weather_data["main"]["humidity"]
+    wind_speed = weather_data["wind"]["speed"]
 
-    style.change_color(style.REVERSE)
-    print(f"{city:^{style.PADDING}}", end="")
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    style.change_color(style.YELLOW)
+    print(f"Weather in {city:^{style.PADDING}} {country}", end="")
     style.change_color(style.RESET)
+    
+    style.change_color(style.LIME)
+    print(f"\nTime: {current_time}")
+    style.change_color(style.RESET)
+    
+    style.change_color(style.CYAN)
+    print("\n" + "-" * len(f"Weather in {city:^{style.PADDING}}{country}"), end=" ")
+    style.change_color(style.RESET)
+
 
     weather_symbol, color = _select_weather_display_params(weather_id)
 
     style.change_color(color)
-    print(f"\t{weather_symbol}", end=" ")
+    print(f"\nCondition:\t{weather_symbol}", end=" ")
     print(
         f"\t{weather_description.capitalize():^{style.PADDING}}",
         end=" "
     )
+    print(f"\nTemperature:\t{temperature}°{'F' if imperial else 'C'}")
+    print(f"Humidity:\t{humidity}%")
+    print(f"Wind:\t{wind_speed} m/s")
     style.change_color(style.RESET)
 
-    print(f"({temperature}°{'F' if imperial else 'C'})")
+    style.change_color(style.CYAN)
+    print("\n" + "-" * len(f"Weather in {city:^{style.PADDING}}{country}"), end="\n")
+    style.change_color(style.RESET)
 
+    
 
 # Select Weather Display Parameters.
 def _select_weather_display_params(weather_id):
     if weather_id in THUNDERSTORM:
-        display_params = ("💥", style.RED)
+        display_params = ("⚡⛈️⚡️", style.RED)
+        print("\nThunderstorms, Find a safe, enclosed shelter.")
     elif weather_id in DRIZZLE:
-        display_params = ("💧", style.CYAN)
+        display_params = ("💧💧💧", style.CYAN)
+        print("\nLight showers. Still worthy of your Raincoat.")
     elif weather_id in RAIN:
-        display_params = ("💦", style.BLUE)
+        display_params = ("🌧️☔🌧️", style.BLUE)
+        print("\nDon't forget your Raincoat")
     elif weather_id in SNOW:
-        display_params = ("⛄️", style.WHITE)
+        display_params = ("🧊❄️⛸️", style.WHITE)
+        print("\nWinter is not a season, it's a celebration.")
     elif weather_id in ATMOSPHERE:
-        display_params = ("🌀", style.BLUE)
+        display_params = ("🌀🌀🌀", style.BLUE)
+        print("\n....for it is only in an atmosphere of quiet that true joy dare live")
     elif weather_id in CLEAR:
-        display_params = ("🔆", style.YELLOW)
+        display_params = ("🔆☀️🔆", style.GREEN)
+        print("\nNice weather to go for a walk.🐕‍🦺🚶‍♂️")
     elif weather_id in CLOUDY:
-        display_params = ("💨", style.PURPLE)
+        display_params = ("☁️☁️☁️", style.PURPLE)
+        print("\nThe weather is perfect.👌")
     else:  # In case the API adds new weather codes
         display_params = ("🌈", style.RESET)
     return (display_params)
